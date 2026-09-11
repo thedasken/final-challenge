@@ -47,13 +47,13 @@ Versioned release
 
 # Rules
 
-1. No direct commits to `main`.
+<!-- 1. No direct commits to `main`. -->
 2. Every change must be associated with an issue.
-3. Every change must use a branch.
-4. Every branch must result in a Pull Request.
-5. Another team member must review the Pull Request.
+<!-- 3. Every change must use a branch. -->
+<!-- 4. Every branch must result in a Pull Request. -->
+<!-- 5. Another team member must review the Pull Request. -->
 6. CI must pass before merging.
-7. Every team member must make meaningful contributions.
+<!-- 7. Every team member must make meaningful contributions. -->
 8. Do not use a single student's machine as the only place where the application works.
 9. The final application must be reproducible from a clean checkout.
 
