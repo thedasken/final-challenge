@@ -2,6 +2,8 @@ const express = require('express');
 
 const app = express();
 app.use(express.json());
+const VALID_STATUSES = ['todo', 'in-progress', 'done'];
+const MAX_TITLE_LENGTH = 100;
 
 let tasks = [
   {
@@ -46,15 +48,40 @@ app.get('/tasks/:id', (req, res) => {
 
 app.post('/tasks', (req, res) => {
   const { title, description, status = 'todo' } = req.body;
-
+ 
+  if (typeof title !== 'string' || title.trim() === '') {
+    return res.status(400).json({
+      error: 'Title is required'
+    });
+  }
+ 
+  if (title.length > MAX_TITLE_LENGTH) {
+    return res.status(400).json({
+      error: 'Title must be 100 characters or less'
+    });
+  }
+ 
+  if (!VALID_STATUSES.includes(status)) {
+    return res.status(400).json({
+      error: 'Invalid status'
+    });
+  }
+ 
+  if (description !== undefined && typeof description !== 'string') {
+    return res.status(400).json({
+      error: 'Description must be a string'
+    });
+  }
+ 
   const task = {
     id: tasks.length ? Math.max(...tasks.map((item) => item.id)) + 1 : 1,
-    title,
+    title: title.trim(),
     description,
     status
   };
-
+ 
   tasks.push(task);
+ 
   return res.status(201).json(task);
 });
 
