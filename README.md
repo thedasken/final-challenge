@@ -86,3 +86,17 @@ The final repository must contain workflows for:
 - publishing the image to GitHub Container Registry.
 
 See `CHALLENGE.md` for the complete requirements.
+
+## Environment Variables
+ 
+The application can be configured using environment variables.
+ 
+| Variable | Description | Default |
+| --- | --- | --- |
+| `PORT` | Port used by the HTTP server | `3000` |
+| `NODE_ENV` | Application runtime environment | `development` |
+ 
+Example:
+ 
+```bash
+PORT=3000 NODE_ENV=development npm start
