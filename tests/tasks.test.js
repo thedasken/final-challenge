@@ -306,3 +306,34 @@ test('PATCH /tasks/:id rejects a title longer than 100 characters', async () => 
   assert.equal(response.status, 400);
   assert.equal(body.error, 'Title must be 100 characters or less');
 });
+
+test('POST /tasks defaults status to todo', async () => {
+  const { response, body } = await request('/tasks', {
+    method: 'POST',
+    body: JSON.stringify({
+      title: 'Task with default status'
+    })
+  });
+
+  assert.equal(response.status, 201);
+  assert.equal(body.status, 'todo');
+});
+
+
+test('PATCH /tasks/:id preserves fields that are not updated', async () => {
+  const { response: getResponse, body: originalTask } = await request('/tasks/2');
+
+  assert.equal(getResponse.status, 200);
+
+  const { response, body } = await request('/tasks/2', {
+    method: 'PATCH',
+    body: JSON.stringify({
+      status: 'done'
+    })
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(body.status, 'done');
+  assert.equal(body.title, originalTask.title);
+  assert.equal(body.description, originalTask.description);
+});
