@@ -109,7 +109,34 @@ test('POST /tasks rejects an invalid description type', async () => {
       status: 'todo'
     })
   });
- 
+
   assert.equal(response.status, 400);
   assert.equal(body.error, 'Description must be a string');
+});
+
+test('GET /tasks filters tasks by status', async () => {
+  const { response, body } = await request('/tasks?status=todo');
+
+  assert.equal(response.status, 200);
+  assert.ok(Array.isArray(body));
+  assert.ok(body.length > 0);
+
+  for (const task of body) {
+    assert.equal(task.status, 'todo');
+  }
+});
+
+test('GET /tasks returns all tasks when no status filter is provided', async () => {
+  const { response, body } = await request('/tasks');
+
+  assert.equal(response.status, 200);
+  assert.ok(Array.isArray(body));
+  assert.ok(body.length >= 3);
+});
+
+test('GET /tasks rejects an invalid status filter', async () => {
+  const { response, body } = await request('/tasks?status=invalid');
+
+  assert.equal(response.status, 400);
+  assert.equal(body.error, 'Invalid status');
 });
