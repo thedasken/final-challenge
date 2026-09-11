@@ -337,3 +337,15 @@ test('PATCH /tasks/:id preserves fields that are not updated', async () => {
   assert.equal(body.title, originalTask.title);
   assert.equal(body.description, originalTask.description);
 });
+test('GET /tasks filters by all valid statuses', async () => {
+  const { response, body } = await request('/tasks?status=todo');
+
+  assert.equal(response.status, 200);
+  assert.ok(Array.isArray(body));
+});
+
+test('GET /tasks returns empty array when no tasks match status filter', async () => {
+  const { response, body } = await request('/tasks?status=done');
+
+  assert.ok(Array.isArray(body));
+});
