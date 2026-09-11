@@ -84,17 +84,20 @@ app.get('/health', (req, res) => {
 app.get('/tasks', (req, res) => {
   const { status } = req.query;
 
+  // Valider status EN PREMIER
   if (status && !VALID_STATUSES.includes(status)) {
     return res.status(400).json({
       error: 'Invalid status'
     });
   }
 
+  // Puis filtrer si status fourni
   if (status) {
     const filteredTasks = tasks.filter((task) => task.status === status);
     return res.json(filteredTasks);
   }
 
+  // Enfin retourner tous les tasks si pas de filtre
   return res.json(tasks);
 });
 
