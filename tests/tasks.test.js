@@ -345,7 +345,7 @@ test('GET /tasks filters by all valid statuses', async () => {
 });
 
 test('GET /tasks returns empty array when no tasks match status filter', async () => {
-  const { response, body } = await request('/tasks?status=done');
+  const { body } = await request('/tasks?status=done');
 
   assert.ok(Array.isArray(body));
 });
