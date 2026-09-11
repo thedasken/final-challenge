@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log*
+coverage
+.env*
+.git
+.gitignore
+.github
+tests
+eslint.config.js
+CHALLENGE.md
+README.md
+compose*.yml
