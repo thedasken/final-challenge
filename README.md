@@ -45,6 +45,17 @@ Starter endpoints:
 
 Students must implement additional functionality from `CHALLENGE.md`.
 
+### Creating a task
+
+`POST /tasks` accepts a JSON object with the following fields:
+
+- `title` (required string, 1 to 100 characters after trimming)
+- `description` (optional string)
+- `status` (optional: `todo`, `in-progress` or `done`; defaults to `todo`)
+
+Unknown fields and non-object or malformed JSON bodies are rejected with a `400`
+response.
+
 ## Docker
 
 Students must create a production-ready Docker image.
