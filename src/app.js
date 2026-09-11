@@ -33,7 +33,20 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/tasks', (req, res) => {
-  res.json(tasks);
+  const { status } = req.query;
+
+  if (status && !VALID_STATUSES.includes(status)) {
+    return res.status(400).json({
+      error: 'Invalid status'
+    });
+  }
+
+  if (status) {
+    const filteredTasks = tasks.filter((task) => task.status === status);
+    return res.json(filteredTasks);
+  }
+
+  return res.json(tasks);
 });
 
 app.get('/tasks/:id', (req, res) => {
