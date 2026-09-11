@@ -108,6 +108,58 @@ app.get('/tasks/:id', (req, res) => {
   return res.json(task);
 });
 
+app.patch('/tasks/:id', (req, res) => {
+  const task = tasks.find((item) => item.id === Number(req.params.id));
+
+  if (!task) {
+    return res.status(404).json({
+      error: 'Task not found'
+    });
+  }
+
+  const { title, description, status } = req.body;
+
+  if (title !== undefined) {
+    if (typeof title !== 'string' || title.trim() === '') {
+      return res.status(400).json({
+        error: 'Title is required'
+      });
+    }
+
+    if (title.length > MAX_TITLE_LENGTH) {
+      return res.status(400).json({
+        error: 'Title must be 100 characters or less'
+      });
+    }
+  }
+
+  if (status !== undefined && !VALID_STATUSES.includes(status)) {
+    return res.status(400).json({
+      error: 'Invalid status'
+    });
+  }
+
+  if (description !== undefined && typeof description !== 'string') {
+    return res.status(400).json({
+      error: 'Description must be a string'
+    });
+  }
+
+  if (title !== undefined) {
+    task.title = title.trim();
+  }
+
+  if (description !== undefined) {
+    task.description = description;
+  }
+
+  if (status !== undefined) {
+    task.status = status;
+  }
+
+  return res.json(task);
+});
+
 app.post('/tasks', (req, res) => {
   const validation = validateTaskInput(req.body);
 
