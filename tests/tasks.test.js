@@ -244,3 +244,65 @@ test('GET /tasks rejects an invalid status filter', async () => {
   assert.equal(response.status, 400);
   assert.equal(body.error, 'Invalid status');
 });
+test('PATCH /tasks/:id updates an existing task', async () => {
+  const { response, body } = await request('/tasks/1', {
+    method: 'PATCH',
+    body: JSON.stringify({
+      title: 'Updated GitHub workshop',
+      status: 'done'
+    })
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(body.id, 1);
+  assert.equal(body.title, 'Updated GitHub workshop');
+  assert.equal(body.status, 'done');
+});
+
+test('PATCH /tasks/:id returns 404 for an unknown task', async () => {
+  const { response, body } = await request('/tasks/999999', {
+    method: 'PATCH',
+    body: JSON.stringify({
+      title: 'Unknown task'
+    })
+  });
+
+  assert.equal(response.status, 404);
+  assert.equal(body.error, 'Task not found');
+});
+
+test('PATCH /tasks/:id rejects an invalid status', async () => {
+  const { response, body } = await request('/tasks/1', {
+    method: 'PATCH',
+    body: JSON.stringify({
+      status: 'invalid-status'
+    })
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(body.error, 'Invalid status');
+});
+
+test('PATCH /tasks/:id rejects an empty title', async () => {
+  const { response, body } = await request('/tasks/1', {
+    method: 'PATCH',
+    body: JSON.stringify({
+      title: ''
+    })
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(body.error, 'Title is required');
+});
+
+test('PATCH /tasks/:id rejects a title longer than 100 characters', async () => {
+  const { response, body } = await request('/tasks/1', {
+    method: 'PATCH',
+    body: JSON.stringify({
+      title: 'a'.repeat(101)
+    })
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(body.error, 'Title must be 100 characters or less');
+});
