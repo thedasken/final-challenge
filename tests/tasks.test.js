@@ -99,6 +99,58 @@ test('POST /tasks rejects a title longer than 100 characters', async () => {
   assert.equal(response.status, 400);
   assert.equal(body.error, 'Title must be 100 characters or less');
 });
+
+test('POST /tasks accepts a title with exactly 100 characters', async () => {
+  const title = 'a'.repeat(100);
+  const { response, body } = await request('/tasks', {
+    method: 'POST',
+    body: JSON.stringify({ title })
+  });
+
+  assert.equal(response.status, 201);
+  assert.equal(body.title, title);
+});
+
+test('POST /tasks rejects an empty title', async () => {
+  const { response, body } = await request('/tasks', {
+    method: 'POST',
+    body: JSON.stringify({ title: '' })
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(body.error, 'Title is required');
+});
+
+test('POST /tasks rejects a title containing only whitespace', async () => {
+  const { response, body } = await request('/tasks', {
+    method: 'POST',
+    body: JSON.stringify({ title: '   ' })
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(body.error, 'Title is required');
+});
+
+test('POST /tasks trims whitespace around a valid title', async () => {
+  const { response, body } = await request('/tasks', {
+    method: 'POST',
+    body: JSON.stringify({ title: '  Write documentation  ' })
+  });
+
+  assert.equal(response.status, 201);
+  assert.equal(body.title, 'Write documentation');
+});
+
+test('POST /tasks validates the title length after trimming', async () => {
+  const title = 'a'.repeat(100);
+  const { response, body } = await request('/tasks', {
+    method: 'POST',
+    body: JSON.stringify({ title: `  ${title}  ` })
+  });
+
+  assert.equal(response.status, 201);
+  assert.equal(body.title, title);
+});
  
 test('POST /tasks rejects an invalid description type', async () => {
   const { response, body } = await request('/tasks', {
@@ -112,6 +164,58 @@ test('POST /tasks rejects an invalid description type', async () => {
 
   assert.equal(response.status, 400);
   assert.equal(body.error, 'Description must be a string');
+});
+
+test('POST /tasks rejects a null body', async () => {
+  const { response, body } = await request('/tasks', {
+    method: 'POST',
+    body: JSON.stringify(null)
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(body.error, 'Invalid request structure');
+});
+
+test('POST /tasks rejects an array body', async () => {
+  const { response, body } = await request('/tasks', {
+    method: 'POST',
+    body: JSON.stringify([{ title: 'Invalid task' }])
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(body.error, 'Invalid request structure');
+});
+
+test('POST /tasks rejects an empty body', async () => {
+  const { response, body } = await request('/tasks', {
+    method: 'POST'
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(body.error, 'Invalid request structure');
+});
+
+test('POST /tasks rejects malformed JSON', async () => {
+  const { response, body } = await request('/tasks', {
+    method: 'POST',
+    body: '{"title":'
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(body.error, 'Invalid request structure');
+});
+
+test('POST /tasks rejects unknown fields', async () => {
+  const { response, body } = await request('/tasks', {
+    method: 'POST',
+    body: JSON.stringify({
+      title: 'Invalid task',
+      unexpectedField: 'unexpected value'
+    })
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(body.error, 'Invalid request structure');
 });
 
 test('GET /tasks filters tasks by status', async () => {

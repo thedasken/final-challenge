@@ -4,6 +4,55 @@ const app = express();
 app.use(express.json());
 const VALID_STATUSES = ['todo', 'in-progress', 'done'];
 const MAX_TITLE_LENGTH = 100;
+const ALLOWED_TASK_FIELDS = ['title', 'description', 'status'];
+
+function validateTaskInput(body) {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+    return { error: 'Invalid request structure' };
+  }
+
+  const fields = Object.keys(body);
+
+  if (fields.length === 0) {
+    return { error: 'Invalid request structure' };
+  }
+
+  const hasUnknownField = fields.some(
+    (field) => !ALLOWED_TASK_FIELDS.includes(field)
+  );
+
+  if (hasUnknownField) {
+    return { error: 'Invalid request structure' };
+  }
+
+  const { title, description, status = 'todo' } = body;
+
+  if (typeof title !== 'string' || title.trim() === '') {
+    return { error: 'Title is required' };
+  }
+
+  const normalizedTitle = title.trim();
+
+  if (normalizedTitle.length > MAX_TITLE_LENGTH) {
+    return { error: 'Title must be 100 characters or less' };
+  }
+
+  if (!VALID_STATUSES.includes(status)) {
+    return { error: 'Invalid status' };
+  }
+
+  if (description !== undefined && typeof description !== 'string') {
+    return { error: 'Description must be a string' };
+  }
+
+  return {
+    value: {
+      title: normalizedTitle,
+      description,
+      status
+    }
+  };
+}
 
 let tasks = [
   {
@@ -60,42 +109,34 @@ app.get('/tasks/:id', (req, res) => {
 });
 
 app.post('/tasks', (req, res) => {
-  const { title, description, status = 'todo' } = req.body;
- 
-  if (typeof title !== 'string' || title.trim() === '') {
-    return res.status(400).json({
-      error: 'Title is required'
-    });
+  const validation = validateTaskInput(req.body);
+
+  if (validation.error) {
+    return res.status(400).json({ error: validation.error });
   }
- 
-  if (title.length > MAX_TITLE_LENGTH) {
-    return res.status(400).json({
-      error: 'Title must be 100 characters or less'
-    });
-  }
- 
-  if (!VALID_STATUSES.includes(status)) {
-    return res.status(400).json({
-      error: 'Invalid status'
-    });
-  }
- 
-  if (description !== undefined && typeof description !== 'string') {
-    return res.status(400).json({
-      error: 'Description must be a string'
-    });
-  }
- 
+
   const task = {
     id: tasks.length ? Math.max(...tasks.map((item) => item.id)) + 1 : 1,
-    title: title.trim(),
-    description,
-    status
+    ...validation.value
   };
- 
+
   tasks.push(task);
- 
+
   return res.status(201).json(task);
+});
+
+app.use((error, req, res, next) => {
+  void req;
+
+  if (
+    error instanceof SyntaxError &&
+    error.status === 400 &&
+    error.type === 'entity.parse.failed'
+  ) {
+    return res.status(400).json({ error: 'Invalid request structure' });
+  }
+
+  return next(error);
 });
 
 if (require.main === module) {
